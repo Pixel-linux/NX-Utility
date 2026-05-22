@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "NXUtility.h"
 #include <iostream>
+#include <string>
+#include <vector>
 
 // TODO: Reference additional headers your program requires here.
