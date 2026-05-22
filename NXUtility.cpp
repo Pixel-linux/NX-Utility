@@ -13,9 +13,15 @@ std::vector<std::string> advancedISOs;
 std::string selected;
 std::string prefix = "--";
 int mode;
+int os; // 1 = Windows, 2 = Linux
+
+void selectDrive() {
+
+}
 
 void selectISO() {
 	bool exists = false;
+	bool valid = false;
 	printf("pre-avaiable isos:\n");
 	if (mode == 1) { // simple mode
 		for (std::string i : simpleISOs) {
@@ -38,26 +44,39 @@ void selectISO() {
 		if (selected == i) {
 			printf("Selected system is valid.");
 			exists = true;
+			valid = true;
 		}
 	}
 	for (std::string i : advancedISOs) {
 		if (selected == i && mode == 2) {
 			printf("Selected system is valid.");
+			valid = true;
 			exists = true;
 		} else if (selected == i && mode != 2) {
 			printf("Selected system is only avaiable on ADVANCED mode!");
+			valid = false;
 			exists = true;
 			exit(1);
 		}
 	}
 	if (!exists) { // checks if the system doesnt exists in the array
 		printf("Selected system does NOT exist.");
+		valid = false;
 		exit(1);
+	} else {
+		selectDrive();
 	}
 }
 
 int main(int argc, char* argv[]) {
 	printf("Hello, World!\n");
+	#ifdef _WIN32
+		os = 1;
+		std::cout << "System: WINDOWS";
+	#elif __linux__
+		os = 2;
+		std::cout <<"System: LINUX";
+	#endif
 	for (int i = 1; 1 < argc; i++) {
 		std::string arg = argv[i];
 
