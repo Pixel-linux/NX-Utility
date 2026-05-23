@@ -2,21 +2,57 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
+#ifdef _WIN32
+	#include <Windows.h>
+#endif
 
 using namespace std;
 
 // Code by NixxLTE -w-
 
-std::vector<std::string> simpleISOs;
+std::vector<std::string> simpleISOs = { "ubuntu", "linux mint" };
 std::vector<std::string> advancedISOs;
 
 std::string selected;
 std::string prefix = "--";
+std::string target;
 int mode;
 int os; // 1 = Windows, 2 = Linux
 
 void selectDrive() {
+	// show avaiable drives
+	#ifdef __linux__
+		for (const auto& entry : std::filesystem::directory_iterator("/sys/block/")) {
+			std::string name = entry.path().filename().string();
+			if (name.find("sd") == 0 || name.find("nvme") == 0) {
+				std::cout << "/dev/" << name << std::endl;
+			}
+    	}
+	#elif _WIN32
+		char drives[256];
+		DWORD size = GetLogicalDriveStringsA(sizeof(drives), drives);
 
+		for (int i = 0; i < size; i += 4) {
+			if (drives[i] != '\0') {
+				std::cout << "Drive: " << &drives[i] << std::endl;
+			}
+		}
+	#endif
+	printf("Select a drive to burn$\033[3m ");
+	std::getline(std::cin, selected);
+	printf("\033[0m");
+	target = selected;
+
+	printf("Are you sure? [Y/N] ");
+	std::getline(std::cin, selected);
+	if (selected == "y" || selected == "Y") {
+
+	}
+	else if (selected == "n" || selected == "N") {
+		printf("trying again...");
+		selectDrive();
+	}
 }
 
 void selectISO() {
@@ -42,14 +78,14 @@ void selectISO() {
 	// check if the selected operating system is valid
 	for (std::string i : simpleISOs) {
 		if (selected == i) {
-			printf("Selected system is valid.");
+			printf("Selected system is valid.\n");
 			exists = true;
 			valid = true;
 		}
 	}
 	for (std::string i : advancedISOs) {
 		if (selected == i && mode == 2) {
-			printf("Selected system is valid.");
+			printf("Selected system is valid,\n");
 			valid = true;
 			exists = true;
 		} else if (selected == i && mode != 2) {
@@ -72,10 +108,10 @@ int main(int argc, char* argv[]) {
 	printf("Hello, World!\n");
 	#ifdef _WIN32
 		os = 1;
-		std::cout << "System: WINDOWS";
+		// std::cout << "System: WINDOWS";
 	#elif __linux__
 		os = 2;
-		std::cout <<"System: LINUX";
+		// std::cout << "System: LINUX";
 	#endif
 	for (int i = 1; 1 < argc; i++) {
 		std::string arg = argv[i];
