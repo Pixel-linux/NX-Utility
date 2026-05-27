@@ -12,18 +12,21 @@ using namespace std;
 
 // Code by NixxLTE -w-
 
-std::string GetTypeWin(std::string letter) {
-	UINT type = GetDriveTypeA(letter.c_str());
-	if (type == DRIVE_REMOVABLE) return " [REMOVABLE] ";
-	if (type == DRIVE_FIXED)     return " [DISK] ";
-	return " [UNKNOWN] ";
-}
-std::string GetTypeLinux(std::string Diskname) {
-	std::ifstream file("/sys/block" + Diskname + "/removable");
-	int removable;
-	file >> removable;
-	return (removable == 1) ? " [REMOVABLE] " : " [DISK] ";
-}	
+#ifdef _WIN32
+	std::string GetType(std::string letter) {
+		UINT type = GetDriveTypeA(letter.c_str());
+		if (type == DRIVE_REMOVABLE) return " [REMOVABLE] ";
+		if (type == DRIVE_FIXED)     return " [DISK] ";
+		return " [UNKNOWN] ";
+	}
+#elif __linux__
+	std::string GetType(std::string Diskname) {
+		std::ifstream file("/sys/block" + Diskname + "/removable");
+		int removable;
+		file >> removable;
+		return (removable == 1) ? " [REMOVABLE] " : " [DISK] ";
+	}	
+#endif
 
 std::vector<std::string> simpleISOs = { "ubuntu", "linux mint" };
 std::vector<std::string> advancedISOs;
@@ -61,7 +64,7 @@ void selectDrive() {
 	#ifdef __linux__
 		for (const auto& entry : std::filesystem::directory_iterator("/sys/block/")) {
 			std::string name = entry.path().filename().string();
-			std::string info = GetTypeLinux(name);
+			std::string info = GetType(name);
 			if (name.find("sd") == 0 || name.find("nvme") == 0) {
 				std::cout << "/dev/" << name << info << std::endl;
 			}
@@ -72,7 +75,7 @@ void selectDrive() {
 
 		for (int i = 0; i < size; i += 4) {
 			if (drives[i] != '\0') {
-				std::string info = GetTypeWin(&drives[i]);
+				std::string info = GetType(&drives[i]);
 				std::cout << &drives[i] << info << std::endl;
 			}
 		}
